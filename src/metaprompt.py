@@ -34,8 +34,8 @@ class MetaPrompt:
 
         variable_string = ""
         for variable in variables:
-            variable_string += "\n{" + variable.upper() + "}"
-        prompt = self.metaprompt.replace("{{TASK}}", task)
+            variable_string += "\n{{" + variable.upper() + "}}"
+        prompt = self.metaprompt.replace("{{{TASK}}}", task)
         assistant_partial = "<Inputs>"
         if variable_string:
             assistant_partial += (
@@ -49,12 +49,22 @@ class MetaPrompt:
         extracted_prompt_template = self.extract_prompt(message)
         variables = self.extract_variables(message)
 
-        return extracted_prompt_template.strip(), "\n".join(variables)
+        for var in variables:
+            pattern = "{{" + var + "}}"
+            replacement = "{{" + var.upper() + "}}"
+            extracted_prompt_template = extracted_prompt_template.replace(
+                pattern, replacement
+            )
+
+        return extracted_prompt_template.strip(), "\n".join(
+            [var.upper() for var in variables]
+        )
 
     def generate_openai_response(self, messages, model_id):
         completion = self.openai_client.chat.completions.create(
             model=model_id,
             messages=messages,
+            temperature=0.2,
         )
         return completion.choices[0].message.content
 
@@ -79,7 +89,7 @@ class MetaPrompt:
         )
 
     def extract_variables(self, prompt):
-        pattern = r"{([^}]+)}"
+        pattern = r"{{([^}]+)}}"
         variables = re.findall(pattern, prompt)
         return set(variables)
 
