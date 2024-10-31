@@ -5,7 +5,7 @@ import boto3
 from botocore.config import Config
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Get the directory where the current script is located
 current_script_path = os.path.dirname(os.path.abspath(__file__))

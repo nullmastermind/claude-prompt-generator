@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError, NoRegionError, EndpointConnectionEr
 from dotenv import load_dotenv
 from urllib3.exceptions import NameResolutionError
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 def check_claude3_availability(region):

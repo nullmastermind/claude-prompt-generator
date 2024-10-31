@@ -19,7 +19,7 @@ metaprompt = MetaPrompt()
 soeprompt = SOEPrompt()
 calibration = CalibrationPrompt()
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 language = os.getenv("LANGUAGE", "en")
 
 # Load translations from JSON file
