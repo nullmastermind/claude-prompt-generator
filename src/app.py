@@ -138,7 +138,9 @@ with gr.Blocks(
                 'Summarize the text delimited by triple quotes.\n\n"""{{insert text here}}"""'
             ],
         )
-        gr.Markdown("Use {{XXX}} to express custom variable, e.g. {{DOCUMENT}}")
+        gr.Markdown(
+            "Use {{VARIABLE_NAME}} to express custom variable, e.g. {{DOCUMENT}}"
+        )
         with gr.Row():
             with gr.Column(scale=2):
                 level = gr.Radio(
