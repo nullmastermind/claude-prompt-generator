@@ -8,6 +8,7 @@ load_dotenv(override=True)
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_base_url = os.getenv("OPENAI_BASE_URL")
+model_id = os.getenv("MODEL_ID") or "gpt-4o"
 
 
 class MetaPrompt:
