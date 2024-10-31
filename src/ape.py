@@ -13,8 +13,8 @@ current_script_path = os.path.dirname(os.path.abspath(__file__))
 # Construct the full path to the file
 prompt_guide_path = os.path.join(current_script_path, "PromptGuide.md")
 
-# Open the file using the full path
-with open(prompt_guide_path, "r") as f:
+# Open the file using the full path with UTF-8 encoding
+with open(prompt_guide_path, "r", encoding="utf-8") as f:
     PromptGuide = f.read()
 
 region_name = os.getenv("REGION_NAME")
