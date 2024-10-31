@@ -184,6 +184,8 @@ Use JSON format when returning results. Please only output the result in json fo
         response_text = completion.choices[0].message.content.strip()
         final_result = None
         try:
+            if "{" not in response_text:
+                response_text = "{" + response_text
             result = json.loads(response_text)
             for idx in range(3):
                 if str(idx + 1) in result["Preferred"]:
@@ -191,4 +193,5 @@ Use JSON format when returning results. Please only output the result in json fo
                     break
         except:
             pass
+
         return final_result
