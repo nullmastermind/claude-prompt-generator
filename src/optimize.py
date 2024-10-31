@@ -11,40 +11,40 @@ model_1_default_system = default_system
 model_2_default_system = default_system
 
 evaluate_response_prompt_template = """
-You are an expert in linguistics and able to observe subtle differences in content between two paragraphs. Your task is to analyze responses from OpenAI and Claude and provide detailed feedback.
+You are an expert in linguistics and able to observe subtle differences in content between two paragraphs. Your task is to analyze responses from {_Model_2} and {_Model_1} and provide detailed feedback.
 
-Here are the OpenAI response: 
+Here are the {_Model_2} response: 
 <response>
 {_OpenAI}
 </response>
 
-Here are the Claude response:
+Here are the {_Model_1} response:
 <response>
 {_Bedrock}
 </response>
 
 Please follow these steps:
 1. Carefully analyze both responses in terms of content accuracy, logical organization, and expression style.
-2. Summarize the differences between the Claude response and the OpenAI response.
-3. Provide recommendations on how the Claude response could be refactored to better align with the OpenAI response.
+2. Summarize the differences between the {_Model_1} response and the {_Model_2} response.
+3. Provide recommendations on how the {_Model_1} response could be refactored to better align with the {_Model_2} response.
 4. Encapsulate your analysis, including the differences, within <auto_feedback></auto_feedback> tags using bullet points.
 5. Encapsulate recommendations, within <recommendation></recommendation> tags using bullet points.
 """.strip()
 
 generate_revised_prompt_template = """
-You are an expert in prompt engineering for both OpenAI and Claude model and able to follow the human feedback to adjust the prompt to attain the optimal effect, you will be given the original Claude prompt, responses from OpenAI, responses from Claude and human feedback to revise the Claude prompt.
+You are an expert in prompt engineering for both {_Model_2} and {_Model_1} model and able to follow the human feedback to adjust the prompt to attain the optimal effect, you will be given the original {_Model_1} prompt, responses from {_Model_2}, responses from {_Model_1} and human feedback to revise the {_Model_1} prompt.
 
-Here are the original Claude prompt: 
+Here are the original {_Model_1} prompt: 
 <prompt>
 {_prompt}
 </prompt>
 
-Here are the OpenAI response:
+Here are the {_Model_2} response:
 <response>
 {_OpenAI}
 </response>
 
-Here are the Claude response:
+Here are the {_Model_1} response:
 <response>
 {_Bedrock}
 </response>
@@ -54,7 +54,7 @@ Here are the human feedback:
 {_feedback}
 </evaluation_summary>
 
-Please analyze whether Claude's response strictly aligns with OpenAI's response based on the human feedback. Then, consider how the original Claude prompt can be improved accordingly. Your revised prompt should only involve slight adjustments and must not drastically change the original prompt. Use the human feedback to guide your revision.
+Please analyze whether {_Model_1}'s response strictly aligns with {_Model_2}'s response based on the human feedback. Then, consider how the original {_Model_1} prompt can be improved accordingly. Your revised prompt should only involve slight adjustments and must not drastically change the original prompt. Use the human feedback to guide your revision.
 
 Finally, provide the revised prompt within the following XML tags:
 
