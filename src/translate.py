@@ -18,7 +18,6 @@ with open(prompt_guide_path, "r", encoding="utf-8") as f:
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_base_url = os.getenv("OPENAI_BASE_URL")
-model_id = os.getenv("TRANSLATE_MODEL_ID") or os.getenv("MODEL_ID") or "gpt-4o"
 
 
 class GuideBased:
@@ -28,7 +27,7 @@ class GuideBased:
             api_key=openai_api_key,
         )
 
-    def __call__(self, initial_prompt):
+    def __call__(self, initial_prompt, model_id):
         lang = "en"
         if "ch" in lang:
             lang_prompt = "Please use Chinese for rewriting. The xml tag name is still in English."
@@ -142,7 +141,7 @@ If the question cannot be answered by the document, say "Cannot answer the quest
         result = result.strip()
         return result
 
-    def judge(self, candidates):
+    def judge(self, candidates, model_id):
         instruction_prompts = []
         for idx, candidate in enumerate(candidates):
             instruction_prompts.append(

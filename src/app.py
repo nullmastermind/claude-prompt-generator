@@ -29,9 +29,9 @@ with open("translations.json", "r", encoding="utf-8") as f:
     lang_store = json.load(f)
 
 
-def generate_prompt(original_prompt, level):
+def generate_prompt(original_prompt, level, model_id):
     if level == "One-time Generation":
-        result = rewrite(original_prompt)
+        result = rewrite(original_prompt, model_id)
         return [
             gr.Textbox(
                 label=lang_store[language]["Prompt Template Generated"],
@@ -44,9 +44,9 @@ def generate_prompt(original_prompt, level):
     elif level == "Multiple-time Generation":
         candidates = []
         for i in range(3):
-            result = rewrite(original_prompt)
+            result = rewrite(original_prompt, model_id)
             candidates.append(result)
-        judge_result = rewrite.judge(candidates)
+        judge_result = rewrite.judge(candidates, model_id)
         textboxes = []
         for i in range(3):
             is_best = "Y" if judge_result == i else "N"
@@ -146,6 +146,11 @@ with gr.Blocks(
         gr.Markdown(
             "Use {{VARIABLE_NAME}} to express custom variable, e.g. {{DOCUMENT}}"
         )
+        translate_model_dropdown = gr.Dropdown(
+            label="Model",
+            choices=model_ids,
+            value=os.getenv("TRANSLATE_MODEL_ID") or os.getenv("MODEL_ID") or "gpt-4o",
+        )
         with gr.Row():
             with gr.Column(scale=2):
                 level = gr.Radio(
@@ -166,7 +171,9 @@ with gr.Blocks(
                     )
                     textboxes.append(t)
                 b1.click(
-                    generate_prompt, inputs=[original_prompt, level], outputs=textboxes
+                    generate_prompt,
+                    inputs=[original_prompt, level, translate_model_dropdown],
+                    outputs=textboxes,
                 )
 
     with gr.Tab(lang_store[language]["Prompt Evaluation"]):
