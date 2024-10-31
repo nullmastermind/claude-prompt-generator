@@ -1,3 +1,9 @@
+# About this fork
+
+Basically, this fork is modified for use with OpenAI-like APIs such as liteLLM, etc.
+
+---
+
 # Claude Prompt Generator
 
 ## Overall Workflow
