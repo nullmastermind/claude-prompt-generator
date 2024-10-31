@@ -18,7 +18,7 @@ with open(prompt_guide_path, "r", encoding="utf-8") as f:
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_base_url = os.getenv("OPENAI_BASE_URL")
-model_id = os.getenv("MODEL_ID") or "gpt-4o"
+model_id = os.getenv("TRANSLATE_MODEL_ID") or os.getenv("MODEL_ID") or "gpt-4o"
 
 
 class GuideBased:
@@ -51,7 +51,7 @@ This instruction is then sent to claude to get the expected output.
 Here are some important rules for rewrite:
 1. Something like `{{variable}}` is customizable text that will be replaced when sent to claude. It needs to be retained in the rewrite.
 2. {lang_prompt}
-3. Only output the rewrite instruction return them in <rerwited></rerwited>XML tags
+3. Only output the rewrite instruction return them in <rerwited></rerwited> XML tags
 4. If examples are already included in the initial prompt, do not remove the examples after the rewrite.
 
 You are a instruction engineer. Your task is to rewrite the initial instruction in <initial_instruction></initial_instruction> xml tag based on the suggestions in the instruction guide in <instruction_guide></instruction_guide> xml tag.
@@ -128,10 +128,12 @@ If the question cannot be answered by the document, say "Cannot answer the quest
         start_idx = response_text.find(start_tag)
         end_idx = response_text.find(end_tag)
 
-        if start_idx != -1 and end_idx != -1:
-            result = response_text[start_idx + len(start_tag) : end_idx].strip()
-        else:
-            result = response_text
+        result = response_text
+        if start_idx != -1:
+            result = result[start_idx + len(start_tag) :]
+        if end_idx != -1:
+            result = result[:end_idx]
+        result = result.strip()
 
         if result.startswith("<instruction>"):
             result = result[13:]
@@ -144,7 +146,7 @@ If the question cannot be answered by the document, say "Cannot answer the quest
         instruction_prompts = []
         for idx, candidate in enumerate(candidates):
             instruction_prompts.append(
-                f"Instruction {idx+1}:\n<instruction>\n{candidate}\n</instruction>"
+                f"Instruction {idx + 1}:\n<instruction>\n{candidate}\n</instruction>"
             )
         example = json.dumps({"Preferred": "Instruction 1"})
         prompt = """
