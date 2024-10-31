@@ -1,18 +1,15 @@
 import json
 import os
-import re
-import threading
 
 import gradio as gr
 from dotenv import load_dotenv
+
 from ape import APE
+from application.soe_prompt import SOEPrompt
 from calibration import CalibrationPrompt
 from metaprompt import MetaPrompt
 from optimize import Alignment
 from translate import GuideBased
-from application.soe_prompt import SOEPrompt
-
-
 
 # Initialize components
 ape = APE()
@@ -26,11 +23,10 @@ load_dotenv()
 language = os.getenv("LANGUAGE", "en")
 
 # Load translations from JSON file
-with open('translations.json', 'r', encoding='utf-8') as f:
+with open("translations.json", "r", encoding="utf-8") as f:
     lang_store = json.load(f)
 
 
-    
 def generate_prompt(original_prompt, level):
     if level == "One-time Generation":
         result = rewrite(original_prompt)
@@ -64,6 +60,7 @@ def generate_prompt(original_prompt, level):
             )
         return textboxes
 
+
 def ape_prompt(original_prompt, user_data):
     result = ape(original_prompt, 1, json.loads(user_data))
     return [
@@ -76,7 +73,10 @@ def ape_prompt(original_prompt, user_data):
         )
     ] + [gr.Textbox(visible=False)] * 2
 
-with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme="soft") as demo:
+
+with gr.Blocks(
+    title=lang_store[language]["Automatic Prompt Engineering"], theme="soft"
+) as demo:
     gr.Markdown(f"# {lang_store[language]['Automatic Prompt Engineering']}")
 
     with gr.Tab(lang_store[language]["Meta Prompt"]):
@@ -84,11 +84,15 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
             label=lang_store[language]["Task"],
             lines=3,
             info=lang_store[language]["Please input your task"],
-            placeholder=lang_store[language]["Draft an email responding to a customer complaint"],
+            placeholder=lang_store[language][
+                "Draft an email responding to a customer complaint"
+            ],
         )
         variables = gr.Textbox(
             label=lang_store[language]["Variables"],
-            info=lang_store[language]["Please input your variables, one variable per line"],
+            info=lang_store[language][
+                "Please input your variables, one variable per line"
+            ],
             lines=5,
             placeholder=lang_store[language]["CUSTOMER_COMPLAINT\nCOMPANY_NAME"],
         )
@@ -115,7 +119,9 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
         original_prompt = gr.Textbox(
             label=lang_store[language]["Please input your original prompt"],
             lines=3,
-            placeholder=lang_store[language]["Summarize the text delimited by triple quotes.\n\n\"\"\"{{insert text here}}\"\"\""],
+            placeholder=lang_store[language][
+                'Summarize the text delimited by triple quotes.\n\n"""{{insert text here}}"""'
+            ],
         )
         gr.Markdown("Use {\{xxx\}} to express custom variable, e.g. {\{document\}}")
         with gr.Row():
@@ -137,7 +143,9 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
                         visible=False if i > 0 else True,
                     )
                     textboxes.append(t)
-                b1.click(generate_prompt, inputs=[original_prompt, level], outputs=textboxes)
+                b1.click(
+                    generate_prompt, inputs=[original_prompt, level], outputs=textboxes
+                )
 
     with gr.Tab(lang_store[language]["Prompt Evaluation"]):
         with gr.Row():
@@ -145,7 +153,9 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
                 label=lang_store[language]["Please input your original prompt"], lines=3
             )
             kv_input_original = gr.Textbox(
-                label=lang_store[language]["[Optional]Input the template variable need to be replaced"],
+                label=lang_store[language][
+                    "[Optional]Input the template variable need to be replaced"
+                ],
                 placeholder="Ref format: key1:value1;key2:value2",
                 lines=3,
             )
@@ -153,10 +163,15 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
                 label=lang_store[language]["Replace Result"], lines=3, interactive=False
             )
             user_prompt_eval = gr.Textbox(
-                label=lang_store[language]["Please input the prompt need to be evaluate"], lines=3
+                label=lang_store[language][
+                    "Please input the prompt need to be evaluate"
+                ],
+                lines=3,
             )
             kv_input_eval = gr.Textbox(
-                label=lang_store[language]["[Optional]Input the template variable need to be replaced"],
+                label=lang_store[language][
+                    "[Optional]Input the template variable need to be replaced"
+                ],
                 placeholder="Ref format: key1:value1;key2:value2",
                 lines=3,
             )
@@ -165,14 +180,18 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
             )
 
         with gr.Row():
-            insert_button_original = gr.Button(lang_store[language]["Replace Variables in Original Prompt"])
+            insert_button_original = gr.Button(
+                lang_store[language]["Replace Variables in Original Prompt"]
+            )
             insert_button_original.click(
                 alignment.insert_kv,
                 inputs=[user_prompt_original, kv_input_original],
                 outputs=user_prompt_original_replaced,
             )
 
-            insert_button_revise = gr.Button(lang_store[language]["Replace Variables in Revised Prompt"])
+            insert_button_revise = gr.Button(
+                lang_store[language]["Replace Variables in Revised Prompt"]
+            )
             insert_button_revise.click(
                 alignment.insert_kv,
                 inputs=[user_prompt_eval, kv_input_eval],
@@ -205,7 +224,6 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
                     "anthropic.claude-3-sonnet-20240229-v1:0",
                     "anthropic.claude-3-5-sonnet-20240620-v1:0",
                     "anthropic.claude-3-haiku-20240307-v1:0",
-
                 ],
                 value="anthropic.claude-3-haiku-20240307-v1:0",
             )
@@ -214,7 +232,10 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
 
         with gr.Row():
             openai_output = gr.Textbox(
-                label=lang_store[language]["OpenAI Output"], lines=3, interactive=False, show_copy_button=True
+                label=lang_store[language]["OpenAI Output"],
+                lines=3,
+                interactive=False,
+                show_copy_button=True,
             )
             aws_output = gr.Textbox(
                 label=lang_store[language]["AWS Bedrock Output"],
@@ -239,7 +260,9 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
         with gr.Row():
             feedback_input = gr.Textbox(
                 label=lang_store[language]["Evaluate the Prompt Effect"],
-                placeholder=lang_store[language]["Input your feedback manually or by model"],
+                placeholder=lang_store[language][
+                    "Input your feedback manually or by model"
+                ],
                 lines=3,
                 show_copy_button=True,
             )
@@ -247,11 +270,12 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
                 label=lang_store[language]["Choose the Evaluation Model"],
                 choices=[
                     "anthropic.claude-3-5-sonnet-20240620-v1:0",
-
                 ],
                 value="anthropic.claude-3-5-sonnet-20240620-v1:0",
             )
-            evaluate_button = gr.Button(lang_store[language]["Auto-evaluate the Prompt Effect"])
+            evaluate_button = gr.Button(
+                lang_store[language]["Auto-evaluate the Prompt Effect"]
+            )
             evaluate_button.click(
                 alignment.evaluate_response,
                 inputs=[openai_output, aws_output, eval_model_dropdown],
@@ -260,7 +284,10 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
 
             revise_button = gr.Button(lang_store[language]["Iterate the Prompt"])
             revised_prompt_output = gr.Textbox(
-                label=lang_store[language]["Revised Prompt"], lines=3, interactive=False, show_copy_button=True
+                label=lang_store[language]["Revised Prompt"],
+                lines=3,
+                interactive=False,
+                show_copy_button=True,
             )
             revise_button.click(
                 alignment.generate_revised_prompt,
@@ -277,46 +304,112 @@ with gr.Blocks(title=lang_store[language]["Automatic Prompt Engineering"], theme
     with gr.Tab(lang_store[language]["SOE-Optimized Product Description"]):
         with gr.Row():
             with gr.Column():
-                product_category = gr.Textbox(label=lang_store[language]["Product Category"], placeholder=lang_store[language]["Enter the product category"])
-                brand_name = gr.Textbox(label=lang_store[language]["Brand Name"], placeholder=lang_store[language]["Enter the brand name"])
-                usage_description = gr.Textbox(label=lang_store[language]["Usage Description"], placeholder=lang_store[language]["Enter the usage description"])
-                target_customer = gr.Textbox(label=lang_store[language]["Target Customer"], placeholder=lang_store[language]["Enter the target customer"])
+                product_category = gr.Textbox(
+                    label=lang_store[language]["Product Category"],
+                    placeholder=lang_store[language]["Enter the product category"],
+                )
+                brand_name = gr.Textbox(
+                    label=lang_store[language]["Brand Name"],
+                    placeholder=lang_store[language]["Enter the brand name"],
+                )
+                usage_description = gr.Textbox(
+                    label=lang_store[language]["Usage Description"],
+                    placeholder=lang_store[language]["Enter the usage description"],
+                )
+                target_customer = gr.Textbox(
+                    label=lang_store[language]["Target Customer"],
+                    placeholder=lang_store[language]["Enter the target customer"],
+                )
             with gr.Column():
-                image_preview = gr.Gallery(label=lang_store[language]["Uploaded Images"], show_label=False, elem_id="image_preview")
-                image_upload = gr.UploadButton(lang_store[language]["Upload Product Image (Optional)"], file_types=["image", "video"], file_count="multiple")
-                generate_button = gr.Button(lang_store[language]["Generate Product Description"])
-        
+                image_preview = gr.Gallery(
+                    label=lang_store[language]["Uploaded Images"],
+                    show_label=False,
+                    elem_id="image_preview",
+                )
+                image_upload = gr.UploadButton(
+                    lang_store[language]["Upload Product Image (Optional)"],
+                    file_types=["image", "video"],
+                    file_count="multiple",
+                )
+                generate_button = gr.Button(
+                    lang_store[language]["Generate Product Description"]
+                )
+
         with gr.Row():
-            product_description = gr.Textbox(label=lang_store[language]["Generated Product Description"], lines=10, interactive=False)
+            product_description = gr.Textbox(
+                label=lang_store[language]["Generated Product Description"],
+                lines=10,
+                interactive=False,
+            )
             generate_button.click(
                 soeprompt.generate_description,
-                inputs=[product_category, brand_name, usage_description, target_customer, image_upload],
+                inputs=[
+                    product_category,
+                    brand_name,
+                    usage_description,
+                    target_customer,
+                    image_upload,
+                ],
                 outputs=product_description,
             )
-            image_upload.upload(lambda images: images, inputs=image_upload, outputs=image_preview)
+            image_upload.upload(
+                lambda images: images, inputs=image_upload, outputs=image_preview
+            )
 
     with gr.Tab(lang_store[language]["Prompt Calibration"]):
-        default_code = '''
+        default_code = """
 def postprocess(llm_output):
     return llm_output
-'''.strip()
+""".strip()
         with gr.Row():
             with gr.Column(scale=2):
-                calibration_task = gr.Textbox(label=lang_store[language]["Please input your task"], lines=3)
-                calibration_prompt_original = gr.Textbox(label=lang_store[language]["Please input your original prompt"], lines=5, placeholder=lang_store[language]["Summarize the text delimited by triple quotes.\n\n\"\"\"{{insert text here}}\"\"\""])
+                calibration_task = gr.Textbox(
+                    label=lang_store[language]["Please input your task"], lines=3
+                )
+                calibration_prompt_original = gr.Textbox(
+                    label=lang_store[language]["Please input your original prompt"],
+                    lines=5,
+                    placeholder=lang_store[language][
+                        'Summarize the text delimited by triple quotes.\n\n"""{{insert text here}}"""'
+                    ],
+                )
             with gr.Column(scale=2):
-                postprocess_code = gr.Textbox(label=lang_store[language]["Please input your postprocess code"], lines=3, value=default_code)
-                dataset_file = gr.File(file_types=['csv'], type='binary')
+                postprocess_code = gr.Textbox(
+                    label=lang_store[language]["Please input your postprocess code"],
+                    lines=3,
+                    value=default_code,
+                )
+                dataset_file = gr.File(file_types=["csv"], type="binary")
         with gr.Row():
             with gr.Column(scale=2):
-                calibration_task = gr.Radio(["classification"], value="classification", label=lang_store[language]["Task type"])
+                calibration_task = gr.Radio(
+                    ["classification"],
+                    value="classification",
+                    label=lang_store[language]["Task type"],
+                )
             with gr.Column(scale=2):
-                steps_num = gr.Slider(1, 5, value=1, step=1, label=lang_store[language]["Epoch"])
-            calibration_optimization = gr.Button(lang_store[language]["Optimization based on prediction"])
-            calibration_prompt = gr.Textbox(label=lang_store[language]["Revised Prompt"], lines=3, show_copy_button=True, interactive=False)
+                steps_num = gr.Slider(
+                    1, 5, value=1, step=1, label=lang_store[language]["Epoch"]
+                )
+            calibration_optimization = gr.Button(
+                lang_store[language]["Optimization based on prediction"]
+            )
+            calibration_prompt = gr.Textbox(
+                label=lang_store[language]["Revised Prompt"],
+                lines=3,
+                show_copy_button=True,
+                interactive=False,
+            )
             calibration_optimization.click(
-                calibration.optimize, inputs=[calibration_task, calibration_prompt_original, dataset_file, postprocess_code, steps_num],
-                outputs=calibration_prompt
+                calibration.optimize,
+                inputs=[
+                    calibration_task,
+                    calibration_prompt_original,
+                    dataset_file,
+                    postprocess_code,
+                    steps_num,
+                ],
+                outputs=calibration_prompt,
             )
 
 demo.launch()
