@@ -1,64 +1,89 @@
-import os
 import base64
 import json
-import boto3
+import os
 
+import boto3
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class SOEPrompt:
-    def __init__(self, model_id="anthropic.claude-3-sonnet-20240229-v1:0", system='You are an AI assistant that generates SEO-optimized product descriptions.'):
-        self.bedrock_runtime = boto3.client(service_name='bedrock-runtime', region_name=os.getenv("REGION_NAME"))
+    def __init__(
+        self,
+        model_id="anthropic.claude-3-sonnet-20240229-v1:0",
+        system="You are an AI assistant that generates SEO-optimized product descriptions.",
+    ):
+        self.bedrock_runtime = boto3.client(
+            service_name="bedrock-runtime", region_name=os.getenv("REGION_NAME")
+        )
         self.model_id = model_id
         self.system = system
 
     def encode_image(self, image_path):
         with open(image_path, "rb") as image_file:
-            return base64.b64encode(image_file.read()).decode('utf-8')
+            return base64.b64encode(image_file.read()).decode("utf-8")
 
     def run_multi_modal_prompt(self, messages, max_tokens=4000):
-        body = json.dumps({
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": max_tokens,
-            "messages": messages
-        })
+        body = json.dumps(
+            {
+                "anthropic_version": "bedrock-2023-05-31",
+                "max_tokens": max_tokens,
+                "messages": messages,
+            }
+        )
 
-        response = self.bedrock_runtime.invoke_model(
-            body=body, modelId=self.model_id)
-        response_body = json.loads(response.get('body').read())
+        response = self.bedrock_runtime.invoke_model(body=body, modelId=self.model_id)
+        response_body = json.loads(response.get("body").read())
 
         return response_body
 
     def generate_bedrock_response(self, prompt):
-        messages = [{
-            "role": "user",
-            "content": [{"type": "text", "text": prompt}]
-        }]
-        body = json.dumps({
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 4000,
-            "messages": messages,
-            "system": self.system,
-        })
+        messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
+        body = json.dumps(
+            {
+                "anthropic_version": "bedrock-2023-05-31",
+                "max_tokens": 4000,
+                "messages": messages,
+                "system": self.system,
+            }
+        )
         response = self.bedrock_runtime.invoke_model(body=body, modelId=self.model_id)
-        response_body = json.loads(response.get('body').read())
-        return response_body['content'][0]['text']
+        response_body = json.loads(response.get("body").read())
+        return response_body["content"][0]["text"]
 
-    def generate_product_description(self, product_category, brand_name, usage_description, target_customer, image_path=None, media_type="image/jpeg"):
+    def generate_product_description(
+        self,
+        product_category,
+        brand_name,
+        usage_description,
+        target_customer,
+        image_path=None,
+        media_type="image/jpeg",
+    ):
         image_description = None
         if image_path:
             encoded_image = self.encode_image(image_path)
             message = {
                 "role": "user",
                 "content": [
-                    {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": encoded_image}},
-                    {"type": "text", "text": "Describe the uploaded product image including the colors, patterns, textures, and any other relevant details."}
-                ]
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": encoded_image,
+                        },
+                    },
+                    {
+                        "type": "text",
+                        "text": "Describe the uploaded product image including the colors, patterns, textures, and any other relevant details.",
+                    },
+                ],
             }
             messages = [message]
             response = self.run_multi_modal_prompt(messages, max_tokens=4000)
-            image_description = response['content'][0]['text']
+            image_description = response["content"][0]["text"]
             print("Image description generated: {}".format(image_description))
 
         prompt_template = f"""
@@ -97,7 +122,14 @@ class SOEPrompt:
         product_description = self.generate_bedrock_response(prompt_template)
         return product_description
 
-    def generate_description(self, product_category, brand_name, usage_description, target_customer, image_files):
+    def generate_description(
+        self,
+        product_category,
+        brand_name,
+        usage_description,
+        target_customer,
+        image_files,
+    ):
         media_type = None
         if image_files:
             images_paths = [file.name for file in image_files]
@@ -108,7 +140,12 @@ class SOEPrompt:
         else:
             image_path = None
         product_description = self.generate_product_description(
-            product_category, brand_name, usage_description, target_customer, image_path, media_type
+            product_category,
+            brand_name,
+            usage_description,
+            target_customer,
+            image_path,
+            media_type,
         )
 
         return product_description

@@ -3,9 +3,8 @@ import os
 import re
 
 import boto3
-from botocore.config import Config
-from openai import OpenAI
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
@@ -68,6 +67,7 @@ Finally, provide the revised prompt within the following XML tags:
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_base_url = os.getenv("OPENAI_BASE_URL")
+
 
 class Alignment:
     def __init__(self):
