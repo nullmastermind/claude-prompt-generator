@@ -198,7 +198,7 @@ with gr.Blocks(
 
         with gr.Row():
             openai_model_dropdown = gr.Dropdown(
-                label=lang_store[language]["Choose OpenAI Model"],
+                label=lang_store[language]["Choose Model 1"],
                 choices=[
                     "gpt-3.5-turbo",
                     "gpt-3.5-turbo-1106",
@@ -209,7 +209,7 @@ with gr.Blocks(
                 value="gpt-3.5-turbo",
             )
             aws_model_dropdown = gr.Dropdown(
-                label=lang_store[language]["Choose AWS Model"],
+                label=lang_store[language]["Choose Model 2"],
                 choices=[
                     "anthropic.claude-instant-v1:2:100k",
                     "anthropic.claude-instant-v1",
@@ -230,13 +230,13 @@ with gr.Blocks(
 
         with gr.Row():
             openai_output = gr.Textbox(
-                label=lang_store[language]["OpenAI Output"],
+                label=lang_store[language]["Model 1 Output"],
                 lines=3,
                 interactive=False,
                 show_copy_button=True,
             )
             aws_output = gr.Textbox(
-                label=lang_store[language]["AWS Bedrock Output"],
+                label=lang_store[language]["Model 2 Output"],
                 lines=3,
                 interactive=False,
                 show_copy_button=True,
