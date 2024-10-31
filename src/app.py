@@ -82,13 +82,13 @@ def get_models():
         api_key=openai_api_key,
     )
     models = openai_client.models.list()
-    model_ids = [model.id for model in models.data]
 
-    return model_ids
+    return [model.id for model in models.data]
 
 
 with gr.Blocks(
-    title=lang_store[language]["Automatic Prompt Engineering"], theme="soft"
+    title=lang_store[language]["Automatic Prompt Engineering"],
+    theme=gr.themes.Monochrome(primary_hue=gr.themes.colors.pink),
 ) as demo:
     model_ids = get_models()
 
@@ -177,7 +177,7 @@ with gr.Blocks(
                 lines=3,
             )
             user_prompt_original_replaced = gr.Textbox(
-                label=lang_store[language]["Replace Result"], lines=3, interactive=False
+                label=lang_store[language]["Replace Result"], lines=4, interactive=False
             )
             user_prompt_eval = gr.Textbox(
                 label=lang_store[language][
@@ -193,7 +193,7 @@ with gr.Blocks(
                 lines=3,
             )
             user_prompt_eval_replaced = gr.Textbox(
-                label=lang_store[language]["Replace Result"], lines=3, interactive=False
+                label=lang_store[language]["Replace Result"], lines=4, interactive=False
             )
 
         with gr.Row():
@@ -362,4 +362,4 @@ def postprocess(llm_output):
                 outputs=calibration_prompt,
             )
 
-demo.launch()
+demo.launch(allowed_paths=[])
