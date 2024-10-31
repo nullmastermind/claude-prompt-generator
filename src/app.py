@@ -3,6 +3,7 @@ import os
 
 import gradio as gr
 from dotenv import load_dotenv
+from openai import OpenAI
 
 from ape import APE
 from calibration import CalibrationPrompt
@@ -18,7 +19,10 @@ metaprompt = MetaPrompt()
 calibration = CalibrationPrompt()
 # Load environment variables
 load_dotenv(override=True)
+
 language = os.getenv("LANGUAGE", "en")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+openai_base_url = os.getenv("OPENAI_BASE_URL")
 
 # Load translations from JSON file
 with open("translations.json", "r", encoding="utf-8") as f:
@@ -72,9 +76,22 @@ def ape_prompt(original_prompt, user_data):
     ] + [gr.Textbox(visible=False)] * 2
 
 
+def get_models():
+    openai_client = OpenAI(
+        base_url=openai_base_url,
+        api_key=openai_api_key,
+    )
+    models = openai_client.models.list()
+    model_ids = [model.id for model in models.data]
+
+    return model_ids
+
+
 with gr.Blocks(
     title=lang_store[language]["Automatic Prompt Engineering"], theme="soft"
 ) as demo:
+    model_ids = get_models()
+
     gr.Markdown(f"# {lang_store[language]['Automatic Prompt Engineering']}")
 
     with gr.Tab(lang_store[language]["Meta Prompt"]):
@@ -197,33 +214,15 @@ with gr.Blocks(
             )
 
         with gr.Row():
-            openai_model_dropdown = gr.Dropdown(
+            model_1_dropdown = gr.Dropdown(
                 label=lang_store[language]["Choose Model 1"],
-                choices=[
-                    "gpt-3.5-turbo",
-                    "gpt-3.5-turbo-1106",
-                    "gpt-4-32k",
-                    "gpt-4-1106-preview",
-                    "gpt-4-turbo-preview",
-                ],
-                value="gpt-3.5-turbo",
+                choices=model_ids,
+                value="gpt-4o-mini",
             )
-            aws_model_dropdown = gr.Dropdown(
+            model_2_dropdown = gr.Dropdown(
                 label=lang_store[language]["Choose Model 2"],
-                choices=[
-                    "anthropic.claude-instant-v1:2:100k",
-                    "anthropic.claude-instant-v1",
-                    "anthropic.claude-v2:0:18k",
-                    "anthropic.claude-v2:0:100k",
-                    "anthropic.claude-v2:1:18k",
-                    "anthropic.claude-v2:1:200k",
-                    "anthropic.claude-v2:1",
-                    "anthropic.claude-v2",
-                    "anthropic.claude-3-sonnet-20240229-v1:0",
-                    "anthropic.claude-3-5-sonnet-20240620-v1:0",
-                    "anthropic.claude-3-haiku-20240307-v1:0",
-                ],
-                value="anthropic.claude-3-haiku-20240307-v1:0",
+                choices=model_ids,
+                value="gpt-4o",
             )
 
             invoke_button = gr.Button(lang_store[language]["Execute prompt"])
@@ -249,8 +248,8 @@ with gr.Blocks(
                     user_prompt_eval_replaced,
                     user_prompt_original,
                     user_prompt_eval,
-                    openai_model_dropdown,
-                    aws_model_dropdown,
+                    model_1_dropdown,
+                    model_2_dropdown,
                 ],
                 outputs=[openai_output, aws_output],
             )
@@ -266,10 +265,8 @@ with gr.Blocks(
             )
             eval_model_dropdown = gr.Dropdown(
                 label=lang_store[language]["Choose the Evaluation Model"],
-                choices=[
-                    "anthropic.claude-3-5-sonnet-20240620-v1:0",
-                ],
-                value="anthropic.claude-3-5-sonnet-20240620-v1:0",
+                choices=model_ids,
+                value="o1-mini",
             )
             evaluate_button = gr.Button(
                 lang_store[language]["Auto-evaluate the Prompt Effect"]
