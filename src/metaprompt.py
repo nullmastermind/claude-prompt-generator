@@ -34,7 +34,7 @@ class MetaPrompt:
 
         variable_string = ""
         for variable in variables:
-            variable_string += "\n{{" + variable.upper() + "}}"
+            variable_string += "\n{{" + variable.upper().replace(" ", "_") + "}}"
         prompt = self.metaprompt.replace("{{{TASK}}}", task)
         assistant_partial = "<Inputs>"
         if variable_string:
