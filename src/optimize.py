@@ -130,9 +130,19 @@ class Alignment:
         )
         return openai_result, aws_result
 
-    def evaluate_response(self, openai_output, aws_output, eval_model_id):
+    def evaluate_response(
+        self,
+        openai_output,
+        aws_output,
+        eval_model_id,
+        openai_model_id,
+        aws_model_id,
+    ):
         revised_prompt = evaluate_response_prompt_template.format(
-            _OpenAI=openai_output, _Bedrock=aws_output
+            _OpenAI=openai_output,
+            _Bedrock=aws_output,
+            _Model_1=openai_model_id,
+            _Model_2=aws_model_id,
         )
         aws_result = self.generate_bedrock_response(revised_prompt, eval_model_id)
         pattern = r"<auto_feedback>(.*?)</auto_feedback>"
@@ -155,7 +165,14 @@ class Alignment:
         return user_prompt
 
     def generate_revised_prompt(
-        self, feedback, prompt, openai_response, aws_response, eval_model_id
+        self,
+        feedback,
+        prompt,
+        openai_response,
+        aws_response,
+        eval_model_id,
+        openai_model_id,
+        aws_model_id,
     ):
         pattern = r"<recommendation>(.*?)</recommendation>"
         matches = re.findall(pattern, feedback, re.DOTALL)
@@ -166,6 +183,8 @@ class Alignment:
             _prompt=prompt,
             _OpenAI=openai_response,
             _Bedrock=aws_response,
+            _Model_1=openai_model_id,
+            _Model_2=aws_model_id,
         )
         aws_result = self.generate_bedrock_response(revised_prompt, eval_model_id)
         pattern = r"<revised_prompt>(.*?)</revised_prompt>"

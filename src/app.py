@@ -273,7 +273,13 @@ with gr.Blocks(
             )
             evaluate_button.click(
                 alignment.evaluate_response,
-                inputs=[openai_output, aws_output, eval_model_dropdown],
+                inputs=[
+                    openai_output,
+                    aws_output,
+                    eval_model_dropdown,
+                    model_1_dropdown,
+                    model_2_dropdown,
+                ],
                 outputs=[feedback_input],
             )
 
@@ -292,6 +298,8 @@ with gr.Blocks(
                     openai_output,
                     aws_output,
                     eval_model_dropdown,
+                    model_1_dropdown,
+                    model_2_dropdown,
                 ],
                 outputs=revised_prompt_output,
             )
