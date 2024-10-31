@@ -15,12 +15,12 @@ You are an expert in linguistics and able to observe subtle differences in conte
 
 Here are the {_Model_2} response: 
 <response>
-{_OpenAI}
+{_Model_1_Response}
 </response>
 
 Here are the {_Model_1} response:
 <response>
-{_Bedrock}
+{_Model_2_Response}
 </response>
 
 Please follow these steps:
@@ -41,12 +41,12 @@ Here are the original {_Model_1} prompt:
 
 Here are the {_Model_2} response:
 <response>
-{_OpenAI}
+{_Model_1_Response}
 </response>
 
 Here are the {_Model_1} response:
 <response>
-{_Bedrock}
+{_Model_2_Response}
 </response>
 
 Here are the human feedback:
@@ -75,10 +75,10 @@ class Alignment:
             api_key=openai_api_key,
         )
 
-    def generate_bedrock_response(self, prompt, model_id):
-        return self.generate_openai_response(prompt=prompt, model_id=model_id)
+    def generate_model_2_response(self, prompt, model_id):
+        return self.generate_model_1_response(prompt=prompt, model_id=model_id)
 
-    def generate_openai_response(self, prompt, model_id):
+    def generate_model_1_response(self, prompt, model_id):
         completion = self.openai_client.chat.completions.create(
             model=model_id,
             messages=[
@@ -87,13 +87,6 @@ class Alignment:
             ],
         )
         return completion.choices[0].message.content
-
-    def stream_bedrock_response(self, prompt, model_id, output_component):
-        self.stream_openai_response(
-            prompt=prompt,
-            model_id=model_id,
-            output_component=output_component,
-        )
 
     def stream_openai_response(self, prompt, model_id, output_component):
         stream = self.openai_client.chat.completions.create(
@@ -122,10 +115,10 @@ class Alignment:
             openai_result = "OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
             aws_result = "OpenAIError: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable"
             return openai_result, aws_result
-        openai_result = self.generate_openai_response(
+        openai_result = self.generate_model_1_response(
             original_prompt_replace, openai_model_id
         )
-        aws_result = self.generate_bedrock_response(
+        aws_result = self.generate_model_2_response(
             revised_prompt_replace, aws_model_id
         )
         return openai_result, aws_result
@@ -139,12 +132,12 @@ class Alignment:
         aws_model_id,
     ):
         revised_prompt = evaluate_response_prompt_template.format(
-            _OpenAI=openai_output,
-            _Bedrock=aws_output,
+            _Model_1_Response=openai_output,
+            _Model_2_Response=aws_output,
             _Model_1=openai_model_id,
             _Model_2=aws_model_id,
         )
-        aws_result = self.generate_bedrock_response(revised_prompt, eval_model_id)
+        aws_result = self.generate_model_2_response(revised_prompt, eval_model_id)
         pattern = r"<auto_feedback>(.*?)</auto_feedback>"
         feedback = re.findall(pattern, aws_result, re.DOTALL)[0]
 
@@ -168,11 +161,11 @@ class Alignment:
         self,
         feedback,
         prompt,
-        openai_response,
-        aws_response,
+        model_1_response,
+        model_2_response,
         eval_model_id,
-        openai_model_id,
-        aws_model_id,
+        model_1_id,
+        model_2_id,
     ):
         pattern = r"<recommendation>(.*?)</recommendation>"
         matches = re.findall(pattern, feedback, re.DOTALL)
@@ -181,12 +174,12 @@ class Alignment:
         revised_prompt = generate_revised_prompt_template.format(
             _feedback=feedback,
             _prompt=prompt,
-            _OpenAI=openai_response,
-            _Bedrock=aws_response,
-            _Model_1=openai_model_id,
-            _Model_2=aws_model_id,
+            _Model_1_Response=model_1_response,
+            _Model_2_Response=model_2_response,
+            _Model_1=model_1_id,
+            _Model_2=model_2_id,
         )
-        aws_result = self.generate_bedrock_response(revised_prompt, eval_model_id)
+        aws_result = self.generate_model_2_response(revised_prompt, eval_model_id)
         pattern = r"<revised_prompt>(.*?)</revised_prompt>"
         matches = re.findall(pattern, aws_result, re.DOTALL)
         # remove all the \n and []
