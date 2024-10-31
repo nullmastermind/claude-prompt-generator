@@ -34,7 +34,7 @@ class MetaPrompt:
 
         variable_string = ""
         for variable in variables:
-            variable_string += "\n{$" + variable.upper() + "}"
+            variable_string += "\n{" + variable.upper() + "}"
         prompt = self.metaprompt.replace("{{TASK}}", task)
         assistant_partial = "<Inputs>"
         if variable_string:
@@ -46,20 +46,6 @@ class MetaPrompt:
             {"role": "assistant", "content": assistant_partial},
         ]
         message = self.generate_openai_response(messages=messages, model_id=model_id)
-
-        def pretty_print(message):
-            print(
-                "\n\n".join(
-                    "\n".join(
-                        line.strip()
-                        for line in re.findall(
-                            r".{1,100}(?:\s+|$)", paragraph.strip("\n")
-                        )
-                    )
-                    for paragraph in re.split(r"\n\n+", message)
-                )
-            )
-
         extracted_prompt_template = self.extract_prompt(message)
         variables = self.extract_variables(message)
 
