@@ -8,7 +8,6 @@ load_dotenv(override=True)
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_base_url = os.getenv("OPENAI_BASE_URL")
-model_id = os.getenv("META_MODEL_ID") or os.getenv("MODEL_ID") or "gpt-4o"
 
 
 class MetaPrompt:
@@ -28,7 +27,7 @@ class MetaPrompt:
             api_key=openai_api_key,
         )
 
-    def __call__(self, task, variables):
+    def __call__(self, task, variables, input_model_id):
         variables = variables.split("\n")
         variables = [variable for variable in variables if len(variable)]
 
@@ -45,7 +44,10 @@ class MetaPrompt:
             {"role": "user", "content": prompt},
             {"role": "assistant", "content": assistant_partial},
         ]
-        message = self.generate_openai_response(messages=messages, model_id=model_id)
+        message = self.generate_openai_response(
+            messages=messages,
+            model_id=input_model_id,
+        )
         extracted_prompt_template = self.extract_prompt(message)
         variables = self.extract_variables(message)
 

@@ -111,6 +111,11 @@ with gr.Blocks(
             lines=5,
             placeholder=lang_store[language]["CUSTOMER_COMPLAINT\nCOMPANY_NAME"],
         )
+        metaprompt_model_dropdown = gr.Dropdown(
+            label="Model",
+            choices=model_ids,
+            value=os.getenv("META_MODEL_ID") or os.getenv("MODEL_ID") or "gpt-4o",
+        )
         metaprompt_button = gr.Button(lang_store[language]["Generate Prompt"])
         prompt_result = gr.Textbox(
             label=lang_store[language]["Prompt Template Generated"],
@@ -126,7 +131,7 @@ with gr.Blocks(
         )
         metaprompt_button.click(
             metaprompt,
-            inputs=[original_task, variables],
+            inputs=[original_task, variables, metaprompt_model_dropdown],
             outputs=[prompt_result, variables_result],
         )
 
