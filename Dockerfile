@@ -18,10 +18,8 @@ COPY src/ ./
 # Expose the port Gradio runs on (default is 7860)
 EXPOSE 7860
 
-RUN ls
-
 # Install dependencies
-RUN poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR
+RUN poetry install --no-root && rm -rf $POETRY_CACHE_DIR
 
 # Run the application
 CMD ["poetry", "run", "python", "app.py"]
