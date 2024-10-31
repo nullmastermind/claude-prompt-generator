@@ -5,7 +5,6 @@ import gradio as gr
 from dotenv import load_dotenv
 
 from ape import APE
-from application.soe_prompt import SOEPrompt
 from calibration import CalibrationPrompt
 from metaprompt import MetaPrompt
 from optimize import Alignment
@@ -16,7 +15,6 @@ ape = APE()
 rewrite = GuideBased()
 alignment = Alignment()
 metaprompt = MetaPrompt()
-soeprompt = SOEPrompt()
 calibration = CalibrationPrompt()
 # Load environment variables
 load_dotenv(override=True)
@@ -299,61 +297,6 @@ with gr.Blocks(
                     eval_model_dropdown,
                 ],
                 outputs=revised_prompt_output,
-            )
-
-    with gr.Tab(lang_store[language]["SOE-Optimized Product Description"]):
-        with gr.Row():
-            with gr.Column():
-                product_category = gr.Textbox(
-                    label=lang_store[language]["Product Category"],
-                    placeholder=lang_store[language]["Enter the product category"],
-                )
-                brand_name = gr.Textbox(
-                    label=lang_store[language]["Brand Name"],
-                    placeholder=lang_store[language]["Enter the brand name"],
-                )
-                usage_description = gr.Textbox(
-                    label=lang_store[language]["Usage Description"],
-                    placeholder=lang_store[language]["Enter the usage description"],
-                )
-                target_customer = gr.Textbox(
-                    label=lang_store[language]["Target Customer"],
-                    placeholder=lang_store[language]["Enter the target customer"],
-                )
-            with gr.Column():
-                image_preview = gr.Gallery(
-                    label=lang_store[language]["Uploaded Images"],
-                    show_label=False,
-                    elem_id="image_preview",
-                )
-                image_upload = gr.UploadButton(
-                    lang_store[language]["Upload Product Image (Optional)"],
-                    file_types=["image", "video"],
-                    file_count="multiple",
-                )
-                generate_button = gr.Button(
-                    lang_store[language]["Generate Product Description"]
-                )
-
-        with gr.Row():
-            product_description = gr.Textbox(
-                label=lang_store[language]["Generated Product Description"],
-                lines=10,
-                interactive=False,
-            )
-            generate_button.click(
-                soeprompt.generate_description,
-                inputs=[
-                    product_category,
-                    brand_name,
-                    usage_description,
-                    target_customer,
-                    image_upload,
-                ],
-                outputs=product_description,
-            )
-            image_upload.upload(
-                lambda images: images, inputs=image_upload, outputs=image_preview
             )
 
     with gr.Tab(lang_store[language]["Prompt Calibration"]):
