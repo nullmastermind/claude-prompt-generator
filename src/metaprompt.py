@@ -52,14 +52,14 @@ class MetaPrompt:
         variables = self.extract_variables(message)
 
         for var in variables:
-            pattern = "{{" + var + "}}"
-            replacement = "{{" + var.upper() + "}}"
+            pattern = "{{" + var.strip() + "}}"
+            replacement = "{{" + var.upper().strip() + "}}"
             extracted_prompt_template = extracted_prompt_template.replace(
                 pattern, replacement
             )
 
         return extracted_prompt_template.strip(), "\n".join(
-            [var.upper() for var in variables]
+            [var.upper().strip() for var in variables]
         )
 
     def generate_openai_response(self, messages, model_id):
