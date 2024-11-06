@@ -37,17 +37,23 @@ class MetaPrompt:
         prompt = self.metaprompt.replace("{{{TASK}}}", task)
         assistant_partial = "<Inputs>"
         if variable_string:
-            assistant_partial += (
-                variable_string + "\n</Inputs>\n<Instructions Structure>"
-            )
+            assistant_partial += variable_string + "\n</Inputs>\n<Instructions>"
         messages = [
-            {"role": "user", "content": prompt},
-            {"role": "assistant", "content": assistant_partial},
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": assistant_partial},
         ]
         message = self.generate_openai_response(
             messages=messages,
             model_id=input_model_id,
         )
+        if "<Instructions>" not in message:
+            message = f"<Instructions>{message}"
+        if "</Instructions>" not in message:
+            message = f"{message}</Instructions>"
+
+        for variable in variables:
+            message = message.replace("${" + variable + "}", "{{" + variable + "}}")
+
         extracted_prompt_template = self.extract_prompt(message)
         variables = self.extract_variables(message)
 
@@ -59,7 +65,7 @@ class MetaPrompt:
             )
 
         return extracted_prompt_template.strip(), "\n".join(
-            [var.upper().strip() for var in variables]
+            set([var.upper().strip() for var in variables])
         )
 
     def generate_openai_response(self, messages, model_id):
@@ -74,6 +80,7 @@ class MetaPrompt:
         self, tag: str, string: str, strip: bool = False
     ) -> list[str]:
         ext_list = re.findall(f"<{tag}>(.+?)</{tag}>", string, re.DOTALL)
+
         if strip:
             ext_list = [e.strip() for e in ext_list]
         return ext_list
@@ -82,11 +89,19 @@ class MetaPrompt:
         return re.sub(r"\n<(\w+)>\s*</\1>\n", "", text, flags=re.DOTALL)
 
     def extract_prompt(self, metaprompt_response):
-        between_tags = self.extract_between_tags("Instructions", metaprompt_response)[0]
+        # Get all matches between Instructions tags
+        between_tags = self.extract_between_tags("Instructions", metaprompt_response)
+
+        # Return empty string if no matches found
+        if not between_tags:
+            return ""
+
+        # Process the first match as before
+        content = between_tags[0]
         return (
-            between_tags[:1000]
+            content[:1000]
             + self.remove_empty_tags(
-                self.remove_empty_tags(between_tags[1000:]).strip()
+                self.remove_empty_tags(content[1000:]).strip()
             ).strip()
         )
 
