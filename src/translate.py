@@ -110,7 +110,7 @@ If the question cannot be answered by the document, say "Cannot answer the quest
                     guide=PromptGuide, initial=initial_prompt, lang_prompt=lang_prompt
                 ),
             },
-            {"role": "user", "content": "<rerwited>"},
+            {"role": "user", "content": "<rerwited>\n…"},
         ]
 
         completion = self.openai_client.chat.completions.create(

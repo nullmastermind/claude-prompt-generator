@@ -37,7 +37,7 @@ class MetaPrompt:
         prompt = self.metaprompt.replace("{{{TASK}}}", task)
         assistant_partial = "<Inputs>"
         if variable_string:
-            assistant_partial += variable_string + "\n</Inputs>\n<Instructions>"
+            assistant_partial += variable_string + "\n</Inputs>\n<Instructions>\n…"
         messages = [
             {"role": "system", "content": prompt},
             {"role": "user", "content": assistant_partial},
