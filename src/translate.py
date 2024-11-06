@@ -105,12 +105,12 @@ If the question cannot be answered by the document, say "Cannot answer the quest
 
         messages = [
             {
-                "role": "user",
+                "role": "system",
                 "content": prompt.format(
                     guide=PromptGuide, initial=initial_prompt, lang_prompt=lang_prompt
                 ),
             },
-            {"role": "assistant", "content": "<rerwited>"},
+            {"role": "user", "content": "<rerwited>"},
         ]
 
         completion = self.openai_client.chat.completions.create(
@@ -120,19 +120,18 @@ If the question cannot be answered by the document, say "Cannot answer the quest
             temperature=0.8,
         )
         response_text = completion.choices[0].message.content.strip()
-
         # Extract text between <rerwited> tags
         start_tag = "<rerwited>"
         end_tag = "</rerwited>"
+
+        if start_tag not in response_text:
+            response_text = f"{start_tag}{response_text}"
+        if end_tag not in response_text:
+            response_text = f"{response_text}{end_tag}"
+
         start_idx = response_text.find(start_tag)
         end_idx = response_text.find(end_tag)
-
-        result = response_text
-        if start_idx != -1:
-            result = result[start_idx + len(start_tag) :]
-        if end_idx != -1:
-            result = result[:end_idx]
-        result = result.strip()
+        result = response_text[start_idx + len(start_tag) : end_idx].strip()
 
         if result.startswith("<instruction>"):
             result = result[13:]
